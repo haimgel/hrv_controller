@@ -1,0 +1,18 @@
+{
+  "name": "HRV Controller",
+  "device_id": "hrv-control",
+  "wifi": {
+    "ssid": "CHANGE-ME-WIFI-SSID",
+    "password": "CHANGE-ME-WIFI-PASSWORD"
+  },
+  "mqtt": {
+    "host": "CHANGE-ME-MQTT-SERVER",
+    "port": 1883
+  },
+  "ota": {
+    "enabled": true
+  },
+  "settings": {
+    "debug_level": 10
+  }
+}
