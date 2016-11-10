@@ -1,0 +1,3 @@
+
+void hrvNodeSetup();
+void hrvNodePublishAll();
