@@ -5,6 +5,8 @@
 #include "utils.hpp"
 #include "node_sensor.hpp"
 #include "node_hrv.hpp"
+#include "nodes_environment.hpp"
+#include "relays.hpp"
 
 // Global declarations
 #define FW_NAME "hrv_control"
@@ -17,9 +19,9 @@
 static const uint8_t PIN_LED = LED_BUILTIN;
 static const uint8_t PIN_BUTTON = D7;
 static const uint8_t PIN_SENSOR = D6;
-static const uint8_t PIN_RELAY1 = D1;
-static const uint8_t PIN_RELAY2 = D2;
-static const uint8_t PIN_RELAY3 = D3;
+static const uint8_t PIN_RELAY_HUMIDISTAT = D1;
+static const uint8_t PIN_RELAY_LOW = D2;
+static const uint8_t PIN_RELAY_HIGH = D3;
 
 /* Just some sensible defaults, which get overriden by configuration settings,
 if set (they probably should) */

@@ -41,6 +41,7 @@ void processButtonPress() {
 // ***************************************************************************
 // Device processing loop
 void loopHandler() {
+  wdt_reset();
   processButtonPress();
   if (PIN_SENSOR != -1) {
     sensorNodesUpdate();
@@ -81,6 +82,10 @@ void setup() {
 
   // "N"-only mode is significantly less power-hungry on ESP8266, use it!
   WiFi.setPhyMode(WIFI_PHY_MODE_11N);
+
+  // Enable watchdog, 8 sec. timer
+  wdt_enable(WDTO_8S);
+
   // Done all housekeeping
   Homie.setup();
 }

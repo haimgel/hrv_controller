@@ -43,20 +43,34 @@ Homie is built on top of Arduino for ESP8266:
 
 This software depends on external sensors to know the indoors and outdoors
 temperature and humidity. So the module subscribes to 4 topics to receive
-timely updates to that information. These topics are configurable in
-`config.json`, and their defaults are:
+timely updates to that information. Obviously external automation is needed
+to supply that information (like, for example, Home Assistant Automation
+setting these properties based on thermostat or Z-Wave sensors installed).
 
- * `changeme/outside/temperature`
- * `changeme/outside/humidity`
- * `changeme/inside/temperature`
- * `changeme/inside/humidity`
+ * `hrv_control/outdoor/temperature/set`
+ * `hrv_control/outdoor/humidity/set`
+ * `hrv_control/indoor/temperature/set`
+ * `hrv_control/indoor/humidity/set`
 
-`hrv_control` is controllable via two topics:
+If updates are not received for two hours, HRV controller will switch into
+"fail-safe" mode of low ventilation (to prevent excessively dry air,
+heating/cooling energy loss).
+
+`hrv_control` is controllable via four topics:
 
  * `hrv_control/hrv/occupancy/set` - one of the following:
     `vacant`, `low`, `medium`, `high`.
  * `hrv_control/hrv/mode/set` - one of the following:
    `off`, `min`, `auto`, `max`
+ * `hrv_control/hrv/humidity/set` - Desirable interior humidity.
+    Can only be set to values between 15% and 85%, or `auto` (default). 
+    `Auto` means:
+     * 50% if exterior temperature is above 15 deg.C
+     * 40% if exterior temperature is below 0 deg.C
+     * 30% if exterior temperature is below -15 deg.C
+
+ * `hrv_control/hrv/temperature/set` - Desirable interior temperature.
+   Defaults to "unknown" -- if not set, will not be taken into account.
 
 See `HRV-smartcontrol.md` for discussion of these parameters and what they do.
 
