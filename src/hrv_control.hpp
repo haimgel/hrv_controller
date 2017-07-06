@@ -3,7 +3,7 @@
 #include <Ticker.h>
 #include <WString.h>
 #include "utils.hpp"
-#include "node_sensor.hpp"
+//#include "node_sensor.hpp"
 #include "node_hrv.hpp"
 #include "nodes_environment.hpp"
 #include "relays.hpp"
@@ -18,7 +18,7 @@
 // Pins we use
 static const uint8_t PIN_LED = LED_BUILTIN;
 static const uint8_t PIN_BUTTON = D7;
-static const uint8_t PIN_SENSOR = D6;
+static const uint8_t PIN_SENSOR = -1;
 static const uint8_t PIN_RELAY_HUMIDISTAT = D1;
 static const uint8_t PIN_RELAY_LOW = D2;
 static const uint8_t PIN_RELAY_HIGH = D3;

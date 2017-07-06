@@ -1,115 +1,69 @@
 
 #include "hrv_control.hpp"
 
-HomieNode externalEnvNode("outdoor", "hvac");
-HomieNode internalEnvNode("indoor", "hvac");
-
 #define PROPERTY_TEMPERATURE "temperature"
 #define PROPERTY_HUMIDITY "humidity"
 
-// Interior / exterior temperature and humidity
-float env_ext_temp = NAN;
-float env_ext_humi = NAN;
-float env_int_temp = NAN;
-float env_int_humi = NAN;
-
-// When the data was received last
-unsigned long last_ext_temp_update = 0;
-unsigned long last_ext_humi_update = 0;
-unsigned long last_int_temp_update = 0;
-unsigned long last_int_humi_update = 0;
-
 // ***************************************************************************
-bool extEnvSetTemp(HomieRange range, String value) {
-  env_ext_temp = value.toFloat();
-  last_ext_temp_update = millis();
-}
-
-// ***************************************************************************
-bool extEnvSetHumi(HomieRange range, String value) {
-  env_ext_humi = value.toFloat();
-  last_ext_humi_update = millis();
-}
-
-// ***************************************************************************
-bool intEnvSetTemp(HomieRange range, String value) {
-  env_int_temp = value.toFloat();
-  last_int_temp_update = millis();
-}
-
-// ***************************************************************************
-bool intEnvSetHumi(HomieRange range, String value) {
-  env_int_humi = value.toFloat();
-  last_int_humi_update = millis();
-}
-
-// ***************************************************************************
-// Setup environment data nodes
-void envNodesSetup() {
-  externalEnvNode.advertise(PROPERTY_TEMPERATURE).settable(extEnvSetTemp);
-  externalEnvNode.advertise(PROPERTY_HUMIDITY).settable(extEnvSetHumi);
-  internalEnvNode.advertise(PROPERTY_TEMPERATURE).settable(intEnvSetTemp);
-  internalEnvNode.advertise(PROPERTY_HUMIDITY).settable(intEnvSetHumi);
+void Environment::setup() {
+  mNode.advertise(PROPERTY_TEMPERATURE).settable([this](const HomieRange& range, const String& value) {
+    float newVal = value.toFloat();
+    applyLowPassFilter(mTimestampTemp, mSampleTemp, mEmaTemp, newVal);
+    if (debugLevelAbove(3)) Serial << "Environment: " << mType << " temperature set to " << mSampleTemp << ", ema=" << mEmaTemp << endl;
+    return true;
+  });
+  mNode.advertise(PROPERTY_HUMIDITY).settable([this](const HomieRange& range, const String& value) {
+    float newVal = value.toFloat();
+    applyLowPassFilter(mTimestampHumi, mSampleHumi, mEmaHumi, newVal);
+    if (debugLevelAbove(3)) Serial << "Environment: " << mType << " humidity set to " << mSampleHumi << ", ema=" << mEmaHumi << endl;
+    return true;
+  });
   hrvNodePublishAll();
 }
 
 // ***************************************************************************
-// Publish all available information
-void envNodesPublishAll() {
-  if (!isnan(env_ext_temp)) {
-    externalEnvNode.setProperty(PROPERTY_TEMPERATURE).send(String(env_ext_temp));
-  } else {
-    externalEnvNode.setProperty(PROPERTY_TEMPERATURE).send("");
+void Environment::publishAll() {
+  float t = temperature();
+  float h = relHumidity();
+  if (!isnan(t)) {
+    mNode.setProperty(PROPERTY_TEMPERATURE).send(String(t));
   }
-  if (!isnan(env_ext_humi)) {
-    externalEnvNode.setProperty(PROPERTY_HUMIDITY).send(String(env_ext_humi));
-  } else {
-    externalEnvNode.setProperty(PROPERTY_HUMIDITY).send("");
-  }
-  if (!isnan(env_int_temp)) {
-    internalEnvNode.setProperty(PROPERTY_TEMPERATURE).send(String(env_int_temp));
-  } else {
-    internalEnvNode.setProperty(PROPERTY_TEMPERATURE).send("");
-  }
-  if (!isnan(env_int_humi)) {
-    internalEnvNode.setProperty(PROPERTY_HUMIDITY).send(String(env_int_humi));
-  } else {
-    internalEnvNode.setProperty(PROPERTY_HUMIDITY).send("");
+  if (!isnan(h)) {
+    mNode.setProperty(PROPERTY_HUMIDITY).send(String(h));
   }
 }
 
 // ***************************************************************************
-// Expire all data that is more than 2 hours old
-void envNodesExpire() {
-  bool expired = false;
-  unsigned long now = millis();
-  if (now = last_ext_temp_update > DATA_LIFETIME_MS) {
-     env_ext_temp = NAN;
-     expired = true;
-  }
-  if (now = last_ext_humi_update > DATA_LIFETIME_MS) {
-     env_ext_humi = NAN;
-     expired = true;
-  }
-  if (now = last_int_temp_update > DATA_LIFETIME_MS) {
-     env_int_temp = NAN;
-     expired = true;
-  }
-  if (now = last_int_humi_update > DATA_LIFETIME_MS) {
-     env_int_humi = NAN;
-     expired = true;
-  }
-  if (expired) envNodesPublishAll();
+// Returns true if data is available and not too stale
+bool Environment::isDataAvailable() {
+  return !isnan(temperature()) && !isnan(relHumidity());
 }
 
 // ***************************************************************************
-// Returns true of all environmental data is current
-bool isEnvironmentalDataCurrent() {
-  return
-    !isnan(env_ext_temp) &&
-    !isnan(env_ext_humi) &&
-    !isnan(env_int_temp) &&
-    !isnan(env_int_humi);
+// Get the current data
+float Environment::temperature() {
+  if (millis() - mTimestampTemp < DATA_LIFETIME_MS)
+    return mEmaTemp;
+  else
+    return NAN;
+}
+
+// ***************************************************************************
+float Environment::relHumidity() {
+  if (millis() - mTimestampHumi < DATA_LIFETIME_MS)
+    return mEmaHumi;
+  else
+    return NAN;
+}
+
+// ***************************************************************************
+float Environment::absHumidity() {
+  float t = temperature();
+  float h = relHumidity();
+  if (!isnan(t) && !isnan(h))
+    return calcAbsoluteHumidity(t, h);
+  else
+    return NAN;
 }
 
 // ***************************************************************************
@@ -119,8 +73,41 @@ bool isEnvironmentalDataCurrent() {
 // Absolute Humidity (grams/m3) = (6.112 x e^[(17.67 x T)/(T+243.5)] x rh x 2.1674) / (273.15+T)
 // This formula is accurate to within 0.1% over the temperature range –30°C to +35°C.
 //
-float absoluteHumidity(float t, float h) {
+float Environment::calcAbsoluteHumidity(float t, float h) {
  float tmp;
  tmp = pow(2.718281828, (17.67 * t) / (t + 243.5));
  return (6.112 * tmp * h * 2.1674) / (273.15 + t);
+}
+
+// ***************************************************************************
+// This basically makes the readings smoother over time. Sudden changes in temperature or humudity
+//  won't have as big effect after this filter. It does introduce some latency, of course
+void Environment::applyLowPassFilter(unsigned long& timestamp, float& oldSample, float& ema, float newSample) {
+  unsigned long now = millis();
+  if (isnan(ema) || (timestamp == 0)) {
+    // First value assignment, no previous data available
+    ema = newSample;
+    oldSample = newSample;
+    timestamp = now;
+  } else {
+    // Delta T is number of HOURS passed since the last measurement
+    float delta_t = (now - timestamp) * 1.0f / (1.0f * 60 * 60 * 1000);
+    ema = exponentialMovingAverageIrregular(EMA_ALPHA, newSample, oldSample, delta_t, ema);
+    oldSample = newSample;
+    timestamp = now;
+  }
+}
+
+// ***************************************************************************
+// Exponential Moving Average (EMA) for irregular time-series
+// Based on:
+//   https://oroboro.com/irregular-ema/
+//   http://stackoverflow.com/a/1027808/331862
+float Environment::exponentialMovingAverageIrregular(float alpha, float sample, float prevSample,
+  float deltaTime, float emaPrev) {
+  float a = deltaTime / alpha;
+  float u = exp(a * -1);
+  float v = (1 - u) / a;
+  float emaNext = ( u * emaPrev ) + (( v - u ) * prevSample ) + (( 1.0 - v ) * sample );
+  return emaNext;
 }
