@@ -48,18 +48,22 @@ void Relays::setFan(fanEnum value) {
 // Update relays based on internal state
 void Relays::update() {
   digitalWrite(PIN_RELAY_HUMIDISTAT, mDehumidistat);
+  if (debugLevelAbove(3)) Serial << "Dehumidistat set to " << mDehumidistat << endl;
   switch (mFan) {
     case fanOff:
       digitalWrite(PIN_RELAY_LOW, false);
       digitalWrite(PIN_RELAY_HIGH, false);
+      debugPrint(3, "Setting fan off");
       break;
     case fanLow:
       digitalWrite(PIN_RELAY_HIGH, false);
       digitalWrite(PIN_RELAY_LOW, true);
+      debugPrint(3, "Setting fan to low");
       break;
     case fanHigh:
       digitalWrite(PIN_RELAY_LOW, false);
       digitalWrite(PIN_RELAY_HIGH, true);
+      debugPrint(3, "Setting fan to high");
       break;
   }
 }
