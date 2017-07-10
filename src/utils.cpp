@@ -1,7 +1,7 @@
 
 #include "hrv_control.hpp"
 
-extern HomieSetting<unsigned long> debugLevelSetting;
+extern HomieSetting<long> debugLevelSetting;
 
 bool str2bool(String value) {
   // Home Assistant passes uppercase ON and OFF to change state

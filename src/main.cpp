@@ -2,7 +2,7 @@
 #include "hrv_control.hpp"
 
 // For more info, see: https://homie-esp8266.readme.io/docs/custom-settings
-HomieSetting<unsigned long> debugLevelSetting("debug_level", "Debug level for console output");
+HomieSetting<long> debugLevelSetting("debug_level", "Debug level for console output");
 
 Bounce button = Bounce();
 
