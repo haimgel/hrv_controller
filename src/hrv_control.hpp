@@ -14,12 +14,12 @@
 // As far as I know, it's the same as "D1 Mini" definition!
 
 // Pins we use
-static const uint8_t PIN_LED = D5;
-static const uint8_t PIN_STATUS_LED = LED_BUILTIN;
-static const uint8_t PIN_BUTTON = 0; //D7; // Internal FLASH button connected to GPIO0 is 0
+static const uint8_t PIN_LED = LED_BUILTIN;
+static const uint8_t PIN_STATUS_LED = D8;
+static const uint8_t PIN_BUTTON = D7; // Internal FLASH button connected to GPIO0 is 0
 static const uint8_t PIN_RELAY_HUMIDISTAT = D6;
-static const uint8_t PIN_RELAY_LOW = D3;
-static const uint8_t PIN_RELAY_HIGH = D8;
+static const uint8_t PIN_RELAY_LOW = D5;
+static const uint8_t PIN_RELAY_HIGH = D0;
 
 /* Just some sensible defaults, which get overriden by configuration settings,
 if set (they probably should) */

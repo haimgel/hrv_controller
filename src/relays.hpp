@@ -16,4 +16,5 @@ private:
   fanEnum mFan;
   bool mDehumidistat;
   void update();
+  void writeRelay(int pin, bool value);
 };

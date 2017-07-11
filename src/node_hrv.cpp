@@ -5,6 +5,7 @@ HomieNode hrvNode("hrv", "hvac");
 Relays relays;
 
 #define PROPERTY_SCHEDULE "schedule"
+#define PROPERTY_SCHEDULE_SET "schedule/set"
 #define PROPERTY_FAN "fan"
 #define PROPERTY_STATUS "status"
 
@@ -129,7 +130,10 @@ void hrvModeSwitch() {
       break;
   }
   hrvUpdate();
-  hrvNodePublishAll();
+  if (Homie.isConnected()) {
+    hrvNode.setProperty(PROPERTY_SCHEDULE_SET).send(hrvScheduleNames[hrvSchedule]);
+    hrvNodePublishAll();
+  }
 }
 
 // ***************************************************************************

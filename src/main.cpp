@@ -38,23 +38,6 @@ void processButtonPress() {
 }
 
 // ***************************************************************************
-// Device processing loop
-void loopHandler() {
-  static unsigned long lastHrvUpdate = 0;
-  wdt_reset();
-  if (PIN_BUTTON != -1) {
-    processButtonPress();
-  }
-  if (PIN_STATUS_LED != -1) {
-    digitalWrite(PIN_STATUS_LED, not hrvGetLed());
-  }
-  if (millis() - lastHrvUpdate > 1000*60) {
-    hrvUpdate();
-    lastHrvUpdate = millis();
-  }
-}
-
-// ***************************************************************************
 // Device has booted in normal mode (configuration present)
 void normalModeSetup() {
   hrvNodeSetup();
@@ -72,7 +55,7 @@ void setup() {
   debugLevelSetting.setDefaultValue(DEFAULT_DEBUG_LEVEL).setValidator([] (unsigned long candidate) {
       return (candidate >= 0) && (candidate <= 10);
   });
-  Homie.setSetupFunction(normalModeSetup).setLoopFunction(loopHandler);
+  Homie.setSetupFunction(normalModeSetup);
   // Setup the on/off button
   if (PIN_BUTTON != -1) {
     pinMode(PIN_BUTTON, INPUT_PULLUP);
@@ -91,15 +74,28 @@ void setup() {
   // "N"-only mode is significantly less power-hungry on ESP8266, use it!
   WiFi.setPhyMode(WIFI_PHY_MODE_11N);
 
-  // Enable watchdog, 8 sec. timer
-  wdt_enable(WDTO_8S);
+  // Enable watchdog, 4 sec. timer
+  ESP.wdtEnable(4000);
 
   // Done all housekeeping
   Homie.setup();
-  // ESP.deepSleep(10e6); // 10 seconds
 }
 
 // ***************************************************************************
 void loop() {
   Homie.loop();
+  ESP.wdtFeed();
+  if (Homie.isConfigured()) {
+    static unsigned long lastHrvUpdate = 0;
+    if (PIN_BUTTON != -1) {
+      processButtonPress();
+    }
+    if (PIN_STATUS_LED != -1) {
+      digitalWrite(PIN_STATUS_LED, hrvGetLed());
+    }
+    if (millis() - lastHrvUpdate > 1000*60) {
+      hrvUpdate();
+      lastHrvUpdate = millis();
+    }
+  }
 }
