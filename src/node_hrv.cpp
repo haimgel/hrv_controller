@@ -12,7 +12,7 @@ Relays relays;
 enum hrvScheduleEnum { schOff, schLow10_50, schLow20_40, schLowFullTime, schHighFullTime };
 const char *hrvScheduleNames[] = { "off", "10_50", "20_40", "low", "high" };
 
-hrvScheduleEnum hrvSchedule = schLow10_50;
+hrvScheduleEnum hrvSchedule = schLow20_40;
 
 // ***************************************************************************
 // Handle occupancy change
@@ -149,8 +149,8 @@ bool hrvGetLed() {
   int tact = ledTact();
   switch (hrvSchedule) {
     case schOff:
-      // Blink for 100ms every 5 seconds, just indication that we're alive.
-      return tact < 2;
+      // Blink for 50ms every 5 seconds, just indication that we're alive.
+      return tact == 0;
       break;
     case schLow10_50:
       return tact <= 10;
@@ -160,7 +160,7 @@ bool hrvGetLed() {
       break;
     case schLowFullTime:
       // Mostly on, short off period to indicate we're alive.
-      return tact < 56;
+      return tact < 58;
       break;
     case schHighFullTime:
       // High-speed blink
