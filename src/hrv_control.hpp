@@ -6,17 +6,13 @@
 #include "node_hrv.hpp"
 #include "relays.hpp"
 
-// Global declarations
-#define FW_NAME "hrv_control"
-#define FW_VERSION "1.2.0"
-
 // Pins definitions as marked on doit.am ESP-12F (http://www.banggood.com/Mini-NodeMCU-ESP8266-WIFI-Development-Board-Based-On-ESP-12F-p-1054209.html)
 // As far as I know, it's the same as "D1 Mini" definition!
 
 // Pins we use
 static const uint8_t PIN_LED = LED_BUILTIN;
 static const uint8_t PIN_STATUS_LED = D8;
-static const uint8_t PIN_BUTTON = D7; // Internal FLASH button connected to GPIO0 is 0
+static const uint8_t PIN_BUTTON = D7;
 static const uint8_t PIN_RELAY_HUMIDISTAT = D6;
 static const uint8_t PIN_RELAY_LOW = D5;
 static const uint8_t PIN_RELAY_HIGH = D0;

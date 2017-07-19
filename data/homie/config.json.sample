@@ -1,6 +1,6 @@
 {
   "name": "HRV Controller",
-  "device_id": "hrv-control",
+  "device_id": "hrv_control",
   "wifi": {
     "ssid": "CHANGE-ME-WIFI-SSID",
     "password": "CHANGE-ME-WIFI-PASSWORD"

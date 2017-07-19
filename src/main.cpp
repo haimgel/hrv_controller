@@ -47,9 +47,9 @@ void normalModeSetup() {
 void setup() {
   Serial.begin(115200);
   Serial << endl << endl;
-  Serial.println(FW_NAME " " FW_VERSION);
+  Serial.println(FW_NAME " " PIO_SRC_REV);
+  Homie_setFirmware(FW_NAME, PIO_SRC_REV);
 
-  Homie_setFirmware(FW_NAME, FW_VERSION);
   // Reset is the same as on/off button, so we handle the login ourselves, above.
   Homie.setLedPin(PIN_LED, LOW).disableResetTrigger();
   debugLevelSetting.setDefaultValue(DEFAULT_DEBUG_LEVEL).setValidator([] (unsigned long candidate) {
