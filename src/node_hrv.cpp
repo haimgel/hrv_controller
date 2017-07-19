@@ -8,6 +8,7 @@ Relays relays;
 #define PROPERTY_SCHEDULE_SET "schedule/set"
 #define PROPERTY_FAN "fan"
 #define PROPERTY_STATUS "status"
+#define PROPERTY_TEXT "text"
 
 enum hrvScheduleEnum { schOff, schLow10_50, schLow20_40, schLowFullTime, schHighFullTime };
 const char *hrvScheduleNames[] = { "off", "10_50", "20_40", "low", "high" };
@@ -42,6 +43,7 @@ void hrvNodeSetup() {
   hrvNode.advertise(PROPERTY_SCHEDULE).settable(hrvScheduleHandler);
   hrvNode.advertise(PROPERTY_FAN);
   hrvNode.advertise(PROPERTY_STATUS);
+  hrvNode.advertise(PROPERTY_TEXT);
   hrvNodePublishAll();
 }
 
@@ -50,29 +52,35 @@ void hrvNodeSetup() {
 void hrvNodePublishAll() {
   hrvNode.setProperty(PROPERTY_SCHEDULE).send(hrvScheduleNames[hrvSchedule]);
   hrvNode.setProperty(PROPERTY_FAN).send(relays.getFanStr().c_str());
-
+  String text = "";
   String status = "";
   switch (hrvSchedule) {
     case schOff:
-      status += "HRV is off";
+      text += "HRV is off";
+      status = "OFF";
       break;
     case schLow10_50:
-      status += "HRV is on 10/50 schedule, fan is ";
-      status += relays.getFan() == fanOff ? "off" : "on";
-      status += " now";
+      text += "HRV is on 10/50 schedule, fan is ";
+      text += relays.getFan() == fanOff ? "off" : "on";
+      text += " now";
+      status = "10 / 50";
       break;
     case schLow20_40:
-      status += "HRV is on 20/40 schedule, fan is ";
-      status += relays.getFan() == fanOff ? "off" : "on";
-      status += " now";
+      text += "HRV is on 20/40 schedule, fan is ";
+      text += relays.getFan() == fanOff ? "off" : "on";
+      text += " now";
+      status = "20 / 40";
       break;
     case schLowFullTime:
-      status += "HRV is in always-on low speed mode";
+      text += "HRV is in always-on low speed mode";
+      status = "CONSTANT LOW";
       break;
     case schHighFullTime:
-    status += "HRV is in always-on high speed mode";
+      text += "HRV is in always-on high speed mode";
+      status = "CONSTANT HIGH";
       break;
   }
+  hrvNode.setProperty(PROPERTY_TEXT).send(text);
   hrvNode.setProperty(PROPERTY_STATUS).send(status);
 }
 
