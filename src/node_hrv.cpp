@@ -73,11 +73,11 @@ void hrvNodePublishAll() {
       break;
     case schLowFullTime:
       text += "HRV is in always-on low speed mode";
-      status = "CONSTANT LOW";
+      status = "LOW";
       break;
     case schHighFullTime:
       text += "HRV is in always-on high speed mode";
-      status = "CONSTANT HIGH";
+      status = "HIGH";
       break;
   }
   hrvNode.setProperty(PROPERTY_TEXT).send(text);
@@ -88,7 +88,7 @@ void hrvNodePublishAll() {
 // Returns "minutes in current hour", where the 0:0 time is started on device boot.
 // This is consistent, but of course does not correspond to real wall-clock.
 int minutes() {
-  return (millis() % (60*60*1000)) / 60000;
+  return ((millis() % (60*60*1000)) / (60*1000));
 }
 
 // ***************************************************************************

@@ -95,6 +95,9 @@ void loop() {
     }
     if (millis() - lastHrvUpdate > 1000*60) {
       hrvUpdate();
+      if (Homie.isConnected()) {
+        hrvNodePublishAll();
+      }
       lastHrvUpdate = millis();
     }
   }
