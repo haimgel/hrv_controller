@@ -29,7 +29,7 @@ Recirculation). This mode is useful when occupancy in the home or activity is hi
 of time
 
 ## How dehumidistat in HRV works
-when the level of interior humidity is above the set point, high-speed ventilation mode is activated,
+When the level of interior humidity is above the set point, high-speed ventilation mode is activated,
 regardless of currently user-selected mode. This is effective only during the heating season,
 when the outdoor temperature is below 15 deg.C. The average person is comfortable between 30% and 50% RH.
 
